@@ -5,4 +5,5 @@
     <dimen name="size_selector_width">112dp</dimen>
     <dimen name="size_selector_heigth">172dp</dimen>
     <dimen name="text_size">36sp</dimen>
+    <dimen name="menu_item_height">96dp</dimen>
 </resources>
