@@ -21,6 +21,10 @@ android {
         }
     }
 
+    viewBinding {
+        enabled = true
+    }
+
     android.defaultConfig.vectorDrawables.useSupportLibrary = true
 }
 
