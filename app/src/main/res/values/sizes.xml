@@ -3,6 +3,6 @@
     <dimen name="play_button_size">192dp</dimen>
     <dimen name="plus_minus_button_size">64dp</dimen>
     <dimen name="size_selector_width">112dp</dimen>
-    <dimen name="size_selector_heigth">172dp</dimen>
+    <dimen name="size_selector_heigth">144dp</dimen>
     <dimen name="text_size">36sp</dimen>
 </resources>
