@@ -9,6 +9,7 @@ import android.widget.SeekBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import ru.bossach.polyrhythmicmetronome.databinding.ActivityMainBinding;
+import ru.bossach.polyrhythmicmetronome.metronome.Metronome;
 
 public class MainActivity extends AppCompatActivity {
 
