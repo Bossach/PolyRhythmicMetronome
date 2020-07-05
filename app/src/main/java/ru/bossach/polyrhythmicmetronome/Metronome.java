@@ -1,60 +1,35 @@
 package ru.bossach.polyrhythmicmetronome;
 
 import android.content.Context;
-import android.media.MediaPlayer;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import android.media.AudioManager;
+import android.media.SoundPool;
 
 
 class Metronome {
-
-    private final int MEDIAPLAYERS_COUNT = 15;
-
-    private Context context;
 
     private volatile int bpm;
 
     private Thread metronome;
     private boolean isActive;
 
-    List<MediaPlayer> players;
+    private SoundPool soundPool;
 
-    Iterator<MediaPlayer> mediaPlayerIterator;
+    private int soundId;
 
 
     Metronome(Context context) {
-        this.context = context;
-        players = new ArrayList<>(MEDIAPLAYERS_COUNT);
-        for (int i = 0; i < MEDIAPLAYERS_COUNT; i++) {
-            players.add(MediaPlayer.create(context, R.raw.click));
-        }
-
-        mediaPlayerIterator = new Iterator<MediaPlayer>() {
-            int index = -1;
-
-            @Override
-            public boolean hasNext() {
-                return true;
-            }
-
-            @Override
-            public MediaPlayer next() {
-                index++;
-                index = index % players.size();
-                return players.get(index);
-            }
-        };
+        soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+        soundId = soundPool.load(context, R.raw.click, 1);
     }
 
     private void click() {
-        long before = System.currentTimeMillis() % (60 * 1000);
-        mediaPlayerIterator.next().start();
-        //System.out.println("Before sound start " + before + "\tDelta " + ((System.currentTimeMillis() % (60 * 1000)) - before));
+        soundPool.play(soundId, 1, 1, 0, 0, 1);
     }
 
-    public void start() {
+    void start() {
+
+        soundPool.play(soundId, 0, 0, 0, 0, 1);
+
         if (metronome != null) {
             stop();
         }
@@ -68,7 +43,7 @@ class Metronome {
                 long delay;
                 long timeToNext;
                 while (isActive) {
-                    delay = 60000 / bpm;
+                    delay = getDelay();
                     cur = System.currentTimeMillis();
                     timeToNext = lastTick + delay - cur;
                     if (timeToNext <= 0) {
@@ -99,7 +74,11 @@ class Metronome {
         metronome.start();
     }
 
-    public void stop() {
+    private int getDelay() {
+        return 60000 / bpm;
+    }
+
+    void stop() {
         isActive = false;
         if (metronome != null) {
             metronome.interrupt();
@@ -107,7 +86,7 @@ class Metronome {
         }
     }
 
-    public void setBpm(int bpm) {
+    void setBpm(int bpm) {
         this.bpm = bpm;
     }
 }

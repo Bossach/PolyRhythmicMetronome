@@ -84,6 +84,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        metronome.stop();
+    }
+
+
     private void switchPlay() {
         if (isPlay) {
             metronome.stop();
@@ -98,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void updateSpeed(int speed) {
+        if (speed == current_speed) return;
         if (speed > 240) speed = 240;
         if (speed < 20) speed = 20;
 
