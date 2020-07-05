@@ -26,7 +26,13 @@ android {
     }
 
     android.defaultConfig.vectorDrawables.useSupportLibrary = true
+
+
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
