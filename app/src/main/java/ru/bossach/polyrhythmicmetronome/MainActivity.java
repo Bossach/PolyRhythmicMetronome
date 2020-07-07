@@ -35,14 +35,6 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(LayoutInflater.from(this));
         setContentView(binding.getRoot());
 
-
-        binding.playPauseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switchPlay();
-            }
-        });
-
         metronome = new Metronome(getApplicationContext());
 
         setBpm(DEFAULT_BPM);
@@ -52,6 +44,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setListeners() {
+
+        binding.playPauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchPlay();
+            }
+        });
+
         binding.plus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
