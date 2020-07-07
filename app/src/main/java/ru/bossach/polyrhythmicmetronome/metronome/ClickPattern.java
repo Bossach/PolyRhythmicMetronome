@@ -13,42 +13,76 @@ class ClickPattern implements Iterator<Tone> {
     private static final int DEFAULT_NUMERATOR = 4;
     private static final int DEFAULT_DENOMINATOR = 4;
     private static final int MAX_DENOMINATOR = Constants.GLOBAL_DENSITY;
+    private static final int MAX_NUMERATOR = 256;
     private List<Tone> pattern;
+
+    private String patternString;
+
     private int curIndex = 0;
+
+    public String getPatternString() {
+        return patternString;
+    }
 
     public ClickPattern() {
         this("4/4");
     }
 
-    public ClickPattern(String patternStr) {
-        this.pattern = parsePattern(patternStr);
+    public ClickPattern(String patternString) {
+        parsePattern(patternString);
     }
 
-    private List<Tone> parsePattern(String patternStr) {
+    private void parsePattern(String patternStr) {
         List<Tone> pattern = new ArrayList<>();
+        StringBuilder patternLine = new StringBuilder();
 
-
-        String[] tacts = patternStr.split(TACT_SEPARATOR);
+        //Так надо, чтобы split не отбраVсывал пустые такты в конце
+        String[] tacts = (patternStr + "*").split(TACT_SEPARATOR);
         String[] tactDivided;
         int numerator = DEFAULT_NUMERATOR;
         int denominator = DEFAULT_DENOMINATOR;
 
         for (String tact : tacts) {
+
+            if (patternLine.length() != 0) {
+                patternLine.append(':');
+            }
+
             tactDivided = tact.split(SIZE_SEPARATOR);
 
             if (tactDivided.length > 0) {
-                numerator = Integer.parseInt(tactDivided[0].replaceAll("\\D", ""));
+                String tmp = tactDivided[0].replaceAll("\\D", "");
+                if (tmp.length() > 0) {
+                    numerator = Integer.parseInt(tmp);
+                }
                 if (tactDivided.length > 1) {
-                    denominator = Integer.parseInt(tactDivided[1].replaceAll("\\D", ""));
+                    tmp = tactDivided[1].replaceAll("\\D", "");
+                    if (tmp.length() > 0) {
+                        denominator = Integer.parseInt(tmp);
+                    }
                 }
             }
 
+            if (numerator == 0) {
+                Log.w("Parsing pattern", "Zero numerator, using default");
+                numerator = DEFAULT_NUMERATOR;
+            }
+
+            if (numerator > 256) {
+                numerator = MAX_NUMERATOR;
+            }
+
             if (denominator > MAX_DENOMINATOR || !isTwoDegree(denominator)) {
-                Log.d("Parsing pattern", "Invalid denominator, using default");
+                Log.w("Parsing pattern", "Invalid denominator, using default");
                 denominator = DEFAULT_DENOMINATOR;
             }
 
-            int stepsInTick = MAX_DENOMINATOR/denominator;
+            patternLine.append(numerator);
+            patternLine.append('/');
+            patternLine.append(denominator);
+
+
+            int stepsInTick = MAX_DENOMINATOR / denominator;
             int stepsCount = numerator * stepsInTick;
             boolean isFirst = true;
 
@@ -66,8 +100,11 @@ class ClickPattern implements Iterator<Tone> {
 
         }
 
+        this.patternString = patternLine.toString();
+        Log.d("Parsing pattern", "Parsed pattern line - \"" + this.patternString + "\"");
 
-        return pattern;
+        this.pattern = pattern;
+//        return pattern;
 
 
     }

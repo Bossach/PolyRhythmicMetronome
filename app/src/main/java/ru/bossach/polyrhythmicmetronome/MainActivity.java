@@ -1,9 +1,11 @@
 package ru.bossach.polyrhythmicmetronome;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,11 +15,11 @@ import ru.bossach.polyrhythmicmetronome.metronome.Metronome;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int DEFAULT_SPEED = 120;
-    private static final int TURBO_SPEED = 600;
+    private static final int DEFAULT_BPM = 120;
 
     private boolean isPlay;
-    private int current_speed;
+
+    private int currentBpm;
 
     ActivityMainBinding binding;
 
@@ -43,19 +45,24 @@ public class MainActivity extends AppCompatActivity {
 
         metronome = new Metronome(getApplicationContext());
 
-        updateSpeed(DEFAULT_SPEED);
+        setBpm(DEFAULT_BPM);
 
+        setListeners();
+
+    }
+
+    private void setListeners() {
         binding.plus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateSpeed(current_speed + 1);
+                setBpm(currentBpm + 1);
             }
         });
 
         binding.minus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateSpeed(current_speed - 1);
+                setBpm(currentBpm - 1);
             }
         });
 
@@ -63,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         binding.rhythmSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                updateSpeed(progress + SEEKBAR_BIAS);
+                setBpm(progress + SEEKBAR_BIAS);
             }
 
             @Override
@@ -77,20 +84,45 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        binding.secondRhythmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        final GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            final float BUFFER_LIMIT = 25f;
+            float buffer = 0f;
+            float prevX = 0f;
+
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) setTurbo();
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float diatanceX, float distanceY) {
+                float delta = e2.getX() - prevX;
+                prevX = e2.getX();
+                Log.d("onScroll", "delta: " + delta);
+                if (Math.signum(buffer + delta) != Math.signum(buffer) && buffer != 0) {
+                    buffer = 0;
+                } else {
+                    buffer += delta;
+                }
+                Log.d("onScroll", "buffer: " + buffer);
+                if (Math.abs(buffer) > BUFFER_LIMIT) {
+                    setBpm(currentBpm + (int) Math.signum(buffer));
+                    buffer = 0f;
+                }
+                return true;
+            }
+        });
+
+        binding.rhythmField.setClickable(true);
+
+        binding.rhythmField.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
             }
         });
     }
 
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        metronome.stop();
+    protected void onPause() {
+        super.onPause();
+        if (isPlay) switchPlay();
     }
 
 
@@ -107,21 +139,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void updateSpeed(int speed) {
-        if (speed == current_speed) return;
-        if (speed > 240) speed = 240;
-        if (speed < 20) speed = 20;
+    private void setBpm(int bpm) {
+        if (bpm == currentBpm) return;
+        if (bpm > 240) bpm = 240;
+        if (bpm < 20) bpm = 20;
 
-        current_speed = speed;
-        metronome.setBpm(speed);
-        binding.rhythmField.setText(String.valueOf(current_speed));
-        binding.rhythmSeekBar.setProgress(current_speed - SEEKBAR_BIAS);
+        currentBpm = bpm;
+        metronome.setBpm(bpm);
+        binding.rhythmField.setText(String.valueOf(bpm));
+        binding.rhythmSeekBar.setProgress(bpm - SEEKBAR_BIAS);
     }
-
-    private void setTurbo () {
-        current_speed = TURBO_SPEED;
-        metronome.setBpm(current_speed);
-        binding.rhythmField.setText(String.valueOf(current_speed));
-    }
-
 }

@@ -3,7 +3,6 @@ package ru.bossach.polyrhythmicmetronome.metronome;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +14,13 @@ public class Metronome {
 
     private static final int MAX_METRONOMES = 2;
 
-    private static final float DEFAULT_BASE_TONE = 1.5f;
-    private static final float[] DEFAULT_ACCENT_TONES = new float[]{1.85f, 1.35f, 1.1f, 1.2f};
+    private static final float DEFAULT_BASE_TONE = 1.4f;
+    private static final float[] DEFAULT_ACCENT_TONES = new float[]{1.85f, 1.65f, 1.1f, 1.2f};
+    private static final float DEFAULT_EXTRA_TONE = 1f;
+
+    public int getBpm() {
+        return bpm;
+    }
 
     private volatile int bpm;
 
@@ -28,23 +32,31 @@ public class Metronome {
     private int soundId;
 
     private ArrayList<ClickPattern> patterns;
+    private int preCLicks = 3;
 
 
     public Metronome(Context context) {
         soundPool = new SoundPool(MAX_METRONOMES, AudioManager.STREAM_MUSIC, 0);
         soundId = soundPool.load(context, R.raw.click, 1);
 
+        //TODO
         hardcodePatterns();
 
     }
 
     private void hardcodePatterns() {
         patterns = new ArrayList<>();
-        patterns.add(new ClickPattern("4/4"));
-        patterns.add(new ClickPattern("3/4"));
+        patterns.add(new ClickPattern("2/8"));
+        patterns.add(new ClickPattern("4/8"));
     }
 
     private void tick() {
+
+        if(preCLicks-- > 0) {
+
+            return;
+        }
+
 
         List<Float> toneValues = new ArrayList<>();
 
@@ -70,15 +82,19 @@ public class Metronome {
 
 
     private void click(List<Float> toneValuesAtThisTick) {
-        Log.d("In click", "time: " + System.currentTimeMillis() % getDelay());
         for (Float value : toneValuesAtThisTick) {
-            Log.d("\tIn for", "\ttime: " + System.currentTimeMillis() % getDelay());
-            soundPool.play(soundId, 1, 1, 0, 0, value);
+            click(value);
         }
-
-
-
     }
+
+    private void click(float toneValue) {
+        soundPool.play(soundId, 1, 1, 0, 0, toneValue);
+    }
+
+    private void click() {
+        click(DEFAULT_EXTRA_TONE);
+    }
+
 
     private float getToneValue(ClickPattern pattern, Tone tone) {
         if (patterns.contains(pattern)) {
@@ -99,42 +115,7 @@ public class Metronome {
         }
         isActive = true;
 
-        metronome = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                long lastTick = System.currentTimeMillis();
-                long cur;
-                long delay;
-                long timeToNext;
-                while (isActive) {
-                    delay = getDelay();
-                    cur = System.currentTimeMillis();
-                    timeToNext = lastTick + delay - cur;
-                    if (timeToNext <= 0) {
-                        while (timeToNext <= 0) {
-                            lastTick += delay;
-                            timeToNext = lastTick + delay - cur;
-                        }
-                        tick();
-                        cur = System.currentTimeMillis();
-                        timeToNext = lastTick + delay - cur;
-                    }
-
-
-                    if (timeToNext > 0) {
-                        try {
-                            if (timeToNext > 50) {
-                                Thread.sleep(timeToNext - 50);
-                            } else {
-                                Thread.sleep(0);
-                            }
-                        } catch (InterruptedException e) {
-                            break;
-                        }
-                    }
-                }
-            }
-        });
+        metronome = new Thread(new Ticker());
         metronome.start();
     }
 
@@ -143,6 +124,11 @@ public class Metronome {
     }
 
     public void stop() {
+        pause();
+        reset();
+    }
+
+    public void pause() {
         isActive = false;
         if (metronome != null) {
             metronome.interrupt();
@@ -150,7 +136,42 @@ public class Metronome {
         }
     }
 
+    public void reset() {
+        for (ClickPattern pattern : patterns) {
+            pattern.reset();
+        }
+    }
+
     public void setBpm(int bpm) {
         this.bpm = bpm;
+    }
+
+    private class Ticker implements Runnable {
+
+        @Override
+        public void run() {
+            long lastTick = System.currentTimeMillis();
+            long cur;
+            long delay;
+            long timeToNext;
+            while (isActive) {
+                delay = getDelay();
+                cur = System.currentTimeMillis();
+                timeToNext = lastTick + delay - cur;
+                if (timeToNext <= 0) {
+                    while (timeToNext <= 0) {
+                        lastTick += delay;
+                        timeToNext = lastTick + delay - cur;
+                    }
+                    tick();
+                } else {
+                    try {
+                        Thread.sleep(timeToNext);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
