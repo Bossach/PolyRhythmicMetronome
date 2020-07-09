@@ -54,49 +54,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.66" />
 
-    <ImageButton
-        android:id="@+id/plus"
-        android:layout_width="@dimen/plus_minus_button_size"
-        android:layout_height="@dimen/plus_minus_button_size"
-        app:layout_constraintStart_toEndOf="@+id/rhythmField"
-        app:layout_constraintTop_toTopOf="@+id/rhythmField"
-        app:srcCompat="@drawable/ic_add" />
-
-    <TextView
-        android:id="@+id/rhythmField"
-        android:layout_width="86dp"
-        android:layout_height="@dimen/plus_minus_button_size"
-        android:height="@dimen/plus_minus_button_size"
-        android:gravity="center"
-        android:maxLength="3"
-        android:selectAllOnFocus="false"
-        android:singleLine="true"
-        android:text="222"
-        android:textSize="@dimen/text_size"
-        app:layout_constraintBottom_toTopOf="@+id/bottomDivider"
+    <fragment
+        android:id="@+id/bpmSelector"
+        android:name="ru.bossach.polyrhythmicmetronome.BpmSelector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/bottomDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/topDivider"
-        app:layout_constraintVertical_bias="0.25" />
-
-    <ImageButton
-        android:id="@+id/minus"
-        android:layout_width="@dimen/plus_minus_button_size"
-        android:layout_height="@dimen/plus_minus_button_size"
-        app:layout_constraintEnd_toStartOf="@+id/rhythmField"
-        app:layout_constraintTop_toTopOf="@+id/rhythmField"
-        app:srcCompat="@drawable/ic_sub" />
-
-    <SeekBar
-        android:id="@+id/rhythmSeekBar"
-        android:layout_width="256dp"
-        android:layout_height="32dp"
-        android:max="220"
-        android:progress="100"
-        app:layout_constraintBottom_toTopOf="@+id/bottomDivider"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rhythmField" />
+        app:layout_constraintTop_toBottomOf="@id/topDivider" />
 
     <View
         android:id="@+id/bottomDivider"

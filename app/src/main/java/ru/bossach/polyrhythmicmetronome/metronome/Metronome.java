@@ -12,6 +12,15 @@ import ru.bossach.polyrhythmicmetronome.R;
 
 public class Metronome {
 
+    private static Metronome instance;
+
+    public static Metronome getInstance(Context context) {
+        if (instance == null) {
+            instance = new Metronome(context);
+        }
+        return instance;
+    }
+
     private static final int MAX_METRONOMES = 2;
 
     private static final float DEFAULT_BASE_TONE = 1.4f;
@@ -24,7 +33,7 @@ public class Metronome {
 
     private volatile int bpm;
 
-    private Thread metronome;
+    private Thread metronomeThread;
     private boolean isActive;
 
     private SoundPool soundPool;
@@ -35,7 +44,7 @@ public class Metronome {
     private int preCLicks = 3;
 
 
-    public Metronome(Context context) {
+    private Metronome(Context context) {
         soundPool = new SoundPool(MAX_METRONOMES, AudioManager.STREAM_MUSIC, 0);
         soundId = soundPool.load(context, R.raw.click, 1);
 
@@ -110,13 +119,14 @@ public class Metronome {
 
         soundPool.play(soundId, 0, 0, 0, 0, 1);
 
-        if (metronome != null) {
+        if (metronomeThread != null) {
             stop();
         }
         isActive = true;
 
-        metronome = new Thread(new Ticker());
-        metronome.start();
+        metronomeThread = new Thread(new Ticker());
+        metronomeThread.setDaemon(true);
+        metronomeThread.start();
     }
 
     private int getDelay() {
@@ -130,9 +140,9 @@ public class Metronome {
 
     public void pause() {
         isActive = false;
-        if (metronome != null) {
-            metronome.interrupt();
-            metronome = null;
+        if (metronomeThread != null) {
+            metronomeThread.interrupt();
+            metronomeThread = null;
         }
     }
 
