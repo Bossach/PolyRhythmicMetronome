@@ -49,19 +49,9 @@ public class BpmSelector extends Fragment {
     }
 
     private void setListeners() {
-        binding.plus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setBpm(currentBpm + 1);
-            }
-        });
+        binding.plus.setOnClickListener(v -> setBpm(currentBpm + 1));
 
-        binding.minus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setBpm(currentBpm - 1);
-            }
-        });
+        binding.minus.setOnClickListener(v -> setBpm(currentBpm - 1));
 
 
         binding.rhythmSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -107,12 +97,7 @@ public class BpmSelector extends Fragment {
 
         binding.rhythmField.setClickable(true);
 
-        binding.rhythmField.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event);
-            }
-        });
+        binding.rhythmField.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
     private void setBpm(int bpm) {
