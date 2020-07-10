@@ -75,14 +75,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.58" />
 
-    <ImageButton
-        android:id="@+id/playPauseButton"
-        android:layout_width="@dimen/play_button_size"
-        android:layout_height="@dimen/play_button_size"
+    <fragment
+        android:id="@+id/controlsSection"
+        android:name="ru.bossach.polyrhythmicmetronome.ControlsSection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bottomDivider"
-        app:srcCompat="@drawable/ic_play" />
+        app:layout_constraintTop_toBottomOf="@+id/bottomDivider"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

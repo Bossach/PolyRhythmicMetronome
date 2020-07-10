@@ -156,6 +156,10 @@ public class Metronome {
         this.bpm = bpm;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
     private class Ticker implements Runnable {
 
         @Override
